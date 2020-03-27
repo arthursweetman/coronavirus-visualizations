@@ -5,8 +5,8 @@ library(ggthemes)
 library(countrycode)
 
 # Change these file paths to match the appropriate paths on your computer
-filePath_TimeSeriesConfirmed <- "~/GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
-filePath_TimeSeriesDeaths <- "~/GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
+filePath_TimeSeriesConfirmed <- "GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+filePath_TimeSeriesDeaths <- "GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 filePath_WhereToSaveTheMap <- "~/GitHub/coronavirus-visualizations"
 
 coronaCases <- read_csv(filePath_TimeSeriesConfirmed)

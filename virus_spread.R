@@ -2,22 +2,22 @@ library(tidyverse)
 library(lubridate)
 
 # Change these file paths to match the appropriate paths on your computer
-filePath_TimeSeriesConfirmed <- "~/GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
-filePath_TimeSeriesDeaths <- "~/GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
+filePath_TimeSeriesConfirmed <- "GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+filePath_TimeSeriesDeaths <- "GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 filePath_WhereToSaveCasesPlot <- "~/GitHub/coronavirus-visualizations"
 filePath_WhereToSaveDeathsPlot <- "~/GitHub/coronavirus-visualizations"
 
 coronaCases <- read_csv(filePath_TimeSeriesConfirmed)
 coronaDeaths <- read_csv(filePath_TimeSeriesDeaths)
 
-cases <- corona %>% 
+cases <- coronaCases %>% 
   gather(key = date, value = confirmed, 5:ncol(coronaCases)) %>%
   group_by(date) %>% 
   summarise(confirmed=sum(confirmed)) %>% 
   mutate(date=as.Date(date, format="%m/%d/%y"))
 
 deaths <- coronaDeaths %>% 
-  gather(key = date, value = deaths, 5:ncol(corona)) %>%
+  gather(key = date, value = deaths, 5:ncol(coronaDeaths)) %>%
   group_by(date) %>% 
   summarise(deaths=sum(deaths)) %>% 
   mutate(date=as.Date(date, format="%m/%d/%y"))
@@ -32,7 +32,7 @@ ggplot(data=cases)+
   theme_bw()+
   scale_x_date(date_breaks = "4 days")+
   theme(axis.text.x = element_text(angle=90))+
-  scale_y_continuous(breaks = seq(0,2000000,10000))+
+  scale_y_continuous(breaks = seq(0,2000000,50000))+
   ggsave("virus_cases.png",
          path = filePath_WhereToSaveCasesPlot) 
 

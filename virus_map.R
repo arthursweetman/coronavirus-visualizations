@@ -1,5 +1,4 @@
 library(tidyverse)
-library(lubridate)
 library(maps)
 library(ggthemes)
 library(countrycode)
@@ -7,6 +6,7 @@ library(countrycode)
 # Change these file paths to match the appropriate paths on your computer
 filePath_TimeSeriesConfirmed <- "GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
 filePath_TimeSeriesDeaths <- "GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
+filePath_DailyReports <- "GitHub/COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/"
 filePath_WhereToSaveTheMap <- "~/GitHub/coronavirus-visualizations"
 
 coronaCases <- read_csv(filePath_TimeSeriesConfirmed)
@@ -37,6 +37,7 @@ corona_grouped <- coronaCases %>%
 world_map_corona <- left_join(world_map, corona_grouped, by=c("iso3"="iso3"))
 
 # Map with a logarithmic scale
+options(scipen = 999) # Prevent scale from converting to scientific notation
 ggplot(data=world_map_corona)+
   geom_polygon(aes(x=long, y=lat, group=group, fill=recent))+
   theme_map()+
@@ -44,13 +45,58 @@ ggplot(data=world_map_corona)+
                       na.value = "gray70",
                       name="No. Confirmed",
                       trans="log",
-                      breaks=c(8,80,800,8000,80000))+
+                      breaks=c(10,100,1000,10000,100000))+
   labs(title="Coronavirus Spread",
        subtitle = today()-1,
        caption = "Data source: https://github.com/CSSEGISandData/COVID-19")+
-  theme(legend.position = c(0.05,0.15),
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))+
+  coord_quickmap()+
+  ggsave("virus_map.png",
+         path = filePath_WhereToSaveTheMap)
+
+# USA map with counties
+if(month(today()) < 10){
+  month <- paste0("0",month(today()-1))
+  today <- paste(month,day(today()-1),year(today()-1),sep="-")
+} else {
+  today <- paste(month(today()-1),day(today()-1),year(today()-1),sep="-")
+}
+
+# Read in Daily Report
+coronaCases1 <- read_csv(paste0(
+  filePath_DailyReports,today,".csv"))
+
+# Do some String handling
+corona1_grouped <- coronaCases1 %>% 
+  filter(Country_Region == "US") %>% 
+  rename("county"=Admin2) %>% 
+  mutate(Combined_Key=str_to_lower(str_sub(Combined_Key,1, -5)))
+
+# Read in County AND State USA maps
+USA_map <- map_data("county") %>% 
+  mutate(location_full = paste(subregion,region,sep=", "))
+USA_states <- map_data("state")
+
+# Combine county map and COVID-19 daily report
+USA_map_corona <- left_join(USA_map, corona1_grouped, by=c("location_full"="Combined_Key"))
+
+# Create map, use state map to draw state borders
+ggplot(data=USA_map_corona)+
+  geom_polygon(aes(x=long, y=lat, group=group, fill=Confirmed))+
+  geom_path(aes(x=long,y=lat,group=group), data=USA_states, color="gray50", size=.1)+
+  theme_map()+
+  scale_fill_gradient(low = "gray70", high = "darkred", 
+                      na.value = "gray70",
+                      name="No. Confirmed",
+                      trans="log",
+                      breaks=c(10,100,1000,10000,100000))+
+  labs(title="Coronavirus Spread",
+       subtitle = today()-1,
+       caption = "Data source: https://github.com/CSSEGISandData/COVID-19")+
+  theme(legend.position = c(0.85,0.05),
         plot.title = element_text(hjust = 0.5),
         plot.subtitle = element_text(hjust = 0.5))+
-  ggsave("virus_map.png",
-         path = filePath_WhereToSaveTheMap)+
-  coord_quickmap()
+  coord_quickmap()+
+  ggsave("virus_map_USA.png",
+         path = filePath_WhereToSaveTheMap)

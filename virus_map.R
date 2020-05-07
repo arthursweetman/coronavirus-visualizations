@@ -29,8 +29,8 @@ world_map <- map_data("world")
 # This is necessary because the column with the most recent data
 # changes its name every day
 # Ex. Now we can refer to "recent" rather than today's date as a string
-time <- now()
-coronaCases$recent <- pull(coronaCases, ifelse(hour(time)<19, ncol(coronaCases), ncol(coronaCases)-1)) # If after 7pm, add "-1" to the end of "ncol(corona)"
+# time <- now()
+# coronaCases$recent <- pull(coronaCases, ifelse(hour(time)<19, ncol(coronaCases), ncol(coronaCases)-1)) # If after 7pm, add "-1" to the end of "ncol(corona)"
 
 # Standardizes country names into unique numbers
 coronaCases$iso3 <- countrycode(coronaCases$`Country/Region`,
